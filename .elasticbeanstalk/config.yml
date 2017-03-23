@@ -1,0 +1,14 @@
+branch-defaults:
+  default:
+    environment: 1-0-sample-test-app
+environment-defaults:
+  1-0-sample-test-app:
+    branch: null
+    repository: null
+global:
+  application_name: sample-test-app
+  default_ec2_keyname: test-key
+  default_platform: docker
+  default_region: eu-west-1
+  profile: default
+  sc: null
