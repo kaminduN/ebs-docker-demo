@@ -54,7 +54,9 @@ def aws_resources():
         list_buckets_resp = s3client.list_buckets()
         s3_list = "</br>".join([bucket['Name'] for bucket in
                             list_buckets_resp['Buckets']])
+	logger.info('Found %s buckets' % len(list_buckets_resp['Buckets']))
     except ClientError as e:
+	logger.error('Error occured when listing buckets')
         s3_list = e.response['Error']['Message']
         logger.warning('Error', e.response['Error']['Message'])
 
@@ -62,7 +64,9 @@ def aws_resources():
         list_topics_resp = snsclient.list_topics()
         sns_list = "</br>".join([topic['TopicArn'] for topic in
                         list_topics_resp['Topics']])
+	logger.info('Found %s SNS topics' % len(list_topics_resp['Topics']))
     except ClientError as e:
+	logger.error('Error occured when listing SNS topics')
         sns_list = e.response['Error']['Message']
         logger.warning('Error', e.response['Error']['Message'])
 
