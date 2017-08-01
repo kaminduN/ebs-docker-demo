@@ -1,5 +1,6 @@
 import logging
 import logging.handlers
+import sys
 
 from wsgiref.simple_server import make_server, WSGIServer
 from SocketServer import ThreadingMixIn
@@ -12,19 +13,24 @@ from botocore.exceptions import ClientError
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-# Handler 
+# Handlers 
 LOG_FILE = '/tmp/sample-app/sample-app.log'
-handler = logging.handlers.RotatingFileHandler(LOG_FILE, maxBytes=1048576, backupCount=5)
-handler.setLevel(logging.INFO)
+file_handler = logging.handlers.RotatingFileHandler(LOG_FILE, maxBytes=1048576, backupCount=5)
+file_handler.setLevel(logging.INFO)
 
+stdout_handler = logging.StreamHandler(sys.stdout)
+stdout_handler.setLevel(logging.INFO)
 # Formatter
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter('[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s')
 
-# Add Formatter to Handler
-handler.setFormatter(formatter)
+# Add Formatter to Handlers
+file_handler.setFormatter(formatter)
+stdout_handler.setFormatter(formatter)
 
-# add Handler to Logger
-logger.addHandler(handler)
+# add Handlers to Logger
+logger.addHandler(file_handler)
+logger.addHandler(stdout_handler)
 
 # First, we'll start with Client API for Amazon S3.
 s3client = boto3.client('s3', region_name='eu-west-1')
@@ -54,9 +60,11 @@ def aws_resources():
         list_buckets_resp = s3client.list_buckets()
         s3_list = "</br>".join([bucket['Name'] for bucket in
                             list_buckets_resp['Buckets']])
+
 	logger.info('Found %s buckets' % len(list_buckets_resp['Buckets']))
     except ClientError as e:
 	logger.error('Error occured when listing buckets')
+
         s3_list = e.response['Error']['Message']
         logger.warning('Error', e.response['Error']['Message'])
 
@@ -64,9 +72,11 @@ def aws_resources():
         list_topics_resp = snsclient.list_topics()
         sns_list = "</br>".join([topic['TopicArn'] for topic in
                         list_topics_resp['Topics']])
+	
 	logger.info('Found %s SNS topics' % len(list_topics_resp['Topics']))
     except ClientError as e:
 	logger.error('Error occured when listing SNS topics')
+
         sns_list = e.response['Error']['Message']
         logger.warning('Error', e.response['Error']['Message'])
 
